@@ -134,46 +134,41 @@ class testInstance {
         })
     }
 
-    test(url, chromePath, puppeteer) {
+    test(url, browser) {
         return new Promise((resolve, reject) => {
-            this.fastTest(url).then(() => {
-                puppeteer.launch({
-                    headless: "chrome",
-                    executablePath: chromePath
-                }).then(async (browser) => {
-                    let page = await browser.newPage()
-                    let start = Date.now()
+            this.fastTest(url).then(async () => {
+                let page = await browser.newPage()
+                let start = Date.now()
 
-                    page.setDefaultNavigationTimeout(this.#timeout);
-                    page.setDefaultTimeout(this.#timeout);
+                page.setDefaultNavigationTimeout(this.#timeout);
+                page.setDefaultTimeout(this.#timeout);
 
-                    let isGoodProxy = this.testProxyURL(this.#proxy_url)
-                    let finalURL = `${isGoodProxy.protocol}://`
+                let isGoodProxy = this.testProxyURL(this.#proxy_url)
+                let finalURL = `${isGoodProxy.protocol}://`
 
-                    if (isGoodProxy.username) {
-                        finalURL = `${finalURL}${isGoodProxy.username}:${isGoodProxy.password}@${isGoodProxy.proxy_url}:${isGoodProxy.proxy_port}`
-                    } else {
-                        finalURL = `${finalURL}${isGoodProxy.proxy_url}:${isGoodProxy.proxy_port}`
-                    }
+                if (isGoodProxy.username) {
+                    finalURL = `${finalURL}${isGoodProxy.username}:${isGoodProxy.password}@${isGoodProxy.proxy_url}:${isGoodProxy.proxy_port}`
+                } else {
+                    finalURL = `${finalURL}${isGoodProxy.proxy_url}:${isGoodProxy.proxy_port}`
+                }
 
-                    await page.setRequestInterception(true);
-                    page.on('request', async request => {
-                        await useProxy(request, finalURL);
-                    });
+                await page.setRequestInterception(true);
+                page.on('request', async request => {
+                    await useProxy(request, finalURL);
+                });
 
-                    page.goto(url, { waitUntil: "networkidle2" }).then(async (e) => {
-                        resolve({
-                            status: e.status(),
-                            headers: e.headers(),
-                            data: await page.content(),
-                            latency: Date.now() - start
-                        })
-
-                        await browser.close()
-                    }).catch((err) => {
-                        console.log(err)
+                page.goto(url, { waitUntil: "networkidle2" }).then(async (e) => {
+                    resolve({
+                        status: e.status(),
+                        headers: e.headers(),
+                        data: await page.content(),
+                        latency: Date.now() - start
                     })
-                }).catch(reject)
+
+                    await browser.close()
+                }).catch((err) => {
+                    console.log(err)
+                })
             }).catch(reject)
         })
     }

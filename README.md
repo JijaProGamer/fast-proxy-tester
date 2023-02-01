@@ -106,10 +106,9 @@ the headers, the status, the data and the latency.
     })
 ```
 
- * test(url, chromePath, puppeteeer)
+ * test(url, browser)
         url - the url of the page to test
-        chromePath - a path to any chrome/chromium browser
-        puppeteer - the result of require("puppeteer") or a wrapper of puppeteer
+        browser - a browser launched by puppeteer
 
 Note: If the proxy format is invalid it will reject with a testProxyURL() error
 
