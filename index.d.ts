@@ -39,7 +39,7 @@ export class testInstance {
     testProxyURL(url: string): validResult;
     testPrivacy(): Promise<privacyResult>;
     fastTest(url: string): Promise<testResults>;
-    test(url: string): Promise<testResults>;
+    test(url: string, chromePath: string, puppeteer: any): Promise<testResults>;
 }
 
 export function createProxyTester(proxy_url: string, timeout: number): testInstance
