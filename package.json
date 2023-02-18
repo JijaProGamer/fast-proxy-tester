@@ -1,15 +1,20 @@
 {
   "name": "fast-proxy-tester",
-  "version": "1.0.2",
-  "description": "",
+  "version": "1.0.3",
+  "description": "Simple proxy tester, all in nodejs",
   "main": "index.js",
   "type": "module",
+  "license": "MIT",
+  "types": "./index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "proxy",
+    "proxy test",
+    "proxy tester"
+  ],
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "axios": "^1.2.6",
     "proxy-agent-v2": "^1.0.3",
