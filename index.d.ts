@@ -37,7 +37,8 @@ export const privacyResult = "transparent" | "elite";
 
 export class testInstance {
     testProxyURL(url: string): validResult;
-    testPrivacy(): Promise<privacyResult>;
+    testPrivacy(localIP?: string): Promise<privacyResult>;
+    getLocalIP(): Promise<string>;
     fastTest(url: string): Promise<testResults>;
     test(url: string, chromePath: string, puppeteer: any): Promise<testResults>;
 }

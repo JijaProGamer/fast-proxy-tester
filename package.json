@@ -1,6 +1,6 @@
 {
   "name": "fast-proxy-tester",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Simple proxy tester, all in nodejs",
   "main": "index.js",
   "type": "module",
