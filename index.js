@@ -38,6 +38,12 @@ function getGeo(proxyURL, timeout){
     return doRequest(proxyURL, "https://lumtest.com/myip.json", timeout);
 }
 
+function getScore(proxyIP, timeout){
+    return doRequest(`direct://`, `https://talosintelligence.com/cloud_intel/ip_reputation?ip=${proxyIP}`, timeout);
+    //return doRequest(`direct://`, `https://talosintelligence.com/reputation_center/lookup?search=${proxyIP}`, timeout);
+}
+
+
 class testInstance {
     #proxy_url
     #timeout = 30000
@@ -187,16 +193,79 @@ class testInstance {
         })
     }
 
-    getLocalIP(){
+    #getIP(proxy){
         return new Promise((resolve, reject) => {
-            getIP("direct://", this.#timeout).then((ip) => {
+            getIP(proxy, this.#timeout).then((ip) => {
                 resolve(ip.data);
             }).catch(reject);
         })
     }
 
+    getLocalIP(){
+        return this.#getIP("direct://");
+    }
+
+    getProxyIP(){
+        return this.#getIP(this.#proxy_url);
+    }
+
+    getRawProxyScore(){
+        return new Promise((resolve, reject) => {
+            this.getProxyIP().then((proxyIP) => {
+                getScore(proxyIP, this.#timeout).then((result) => {
+                    result = result.data.reputation;
+                    result = {
+                        reputation_x10: result.reputation_x10,
+                        threat_level_id: result.threat_level_id,
+                        spam_prob_x10000: result.spam_prob_x10000,
+                        spam_level: result.spam_level,
+                        threat_level_mnemonic: result.threat_level_mnemonic,
+                        rep_rule_mnemonics: result.rep_rule_mnemonics,
+                    };
+
+                    resolve(result);
+                }).catch((error) => {
+                    if (error.message.includes("time"))
+                        return reject("timeout")
+    
+                    reject({
+                        message: error.message,
+                        status: error.response?.status,
+                        data: error.response?.data,
+                        headers: error.response?.headers,
+                    })            
+                })
+            }).catch((error) => {
+                if (error.message.includes("time"))
+                    return reject("timeout")
+
+                reject({
+                    message: error.message,
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    headers: error.response?.headers,
+                })   
+            })
+        })
+    }
+
+    getProxyScore(){
+        return new Promise((resolve, reject) => {
+            this.getRawProxyScore().then((rawProxyScore) => {
+                console.log(rawProxyScore)
+                resolve(
+                    rawProxyScore.reputation_x10 >= 0 &&
+                    //rawProxyScore.spam_prob_x10000 <= 100 &&
+                    rawProxyScore.spam_level == "None"
+                );
+            }).catch(reject)
+        })
+    }
+
     testPrivacy(originalIP) {
         return new Promise((resolve, reject) => {
+            let start = Date.now()
+            
             if(originalIP){
                 Promise.all([getIP(this.#proxy_url, this.#timeout), getGeo(this.#proxy_url, this.#timeout)]).then(([ip, geo]) => {
                     let directIP = originalIP; 
